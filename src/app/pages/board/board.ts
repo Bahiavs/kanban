@@ -1,6 +1,7 @@
 import { Component, computed, OnDestroy } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Board } from '../../models/board';
+import { Priority } from '../../models/priority';
 import { Status } from '../../models/status';
 import { Subscription } from 'rxjs';
 import { JsonPipe } from '@angular/common';
@@ -19,7 +20,13 @@ import { JsonPipe } from '@angular/common';
           <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
             <div>Title: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
             <div>Description: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
-            <div>Priority: {{ task.priority }}</div>
+            <div>Priority:
+              <select [formControl]="priorityCtrlByTaskId()[task.id]">
+                @for (p of priorities; track p) {
+                  <option [value]="p">{{ p }}</option>
+                }
+              </select>
+            </div>
             <div>Created at: {{ task.createdAt }}</div>
             <button (click)="board.deleteTask(task.id)">Deletar</button>
           </div>
@@ -37,7 +44,13 @@ import { JsonPipe } from '@angular/common';
           <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
             <div>Title: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
             <div>Description: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
-            <div>Priority: {{ task.priority }}</div>
+            <div>Priority:
+              <select [formControl]="priorityCtrlByTaskId()[task.id]">
+                @for (p of priorities; track p) {
+                  <option [value]="p">{{ p }}</option>
+                }
+              </select>
+            </div>
             <div>Created at: {{ task.createdAt }}</div>
             <button (click)="board.deleteTask(task.id)">Deletar</button>
           </div>
@@ -55,7 +68,13 @@ import { JsonPipe } from '@angular/common';
           <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
             <div>Title: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
             <div>Description: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
-            <div>Priority: {{ task.priority }}</div>
+            <div>Priority:
+              <select [formControl]="priorityCtrlByTaskId()[task.id]">
+                @for (p of priorities; track p) {
+                  <option [value]="p">{{ p }}</option>
+                }
+              </select>
+            </div>
             <div>Created at: {{ task.createdAt }}</div>
             <button (click)="board.deleteTask(task.id)">Deletar</button>
           </div>
@@ -71,6 +90,7 @@ import { JsonPipe } from '@angular/common';
 })
 export class BoardComponent implements OnDestroy {
   protected readonly Status = Status;
+  protected readonly priorities = Object.values(Priority);
 
   protected readonly board = new Board();
 
@@ -114,8 +134,24 @@ export class BoardComponent implements OnDestroy {
     return descriptionCtrlByTaskId;
   });
 
+  private priorityCtrlSubs = new Subscription();
+  protected readonly priorityCtrlByTaskId = computed(() => {
+    const tasks = this.board.tasks();
+    this.priorityCtrlSubs.unsubscribe();
+    this.priorityCtrlSubs = new Subscription();
+    const priorityCtrlByTaskId: Record<string, FormControl<Priority>> = {};
+    for (const task of tasks) {
+      const ctrl = new FormControl(task.priority, { nonNullable: true });
+      priorityCtrlByTaskId[task.id] = ctrl;
+      const sub = ctrl.valueChanges.subscribe((value) => this.board.editTaskPriority(task.id, value));
+      this.priorityCtrlSubs.add(sub);
+    }
+    return priorityCtrlByTaskId;
+  });
+
   ngOnDestroy() {
     this.titleCtrlSubs.unsubscribe();
     this.descriptionCtrlSubs.unsubscribe();
+    this.priorityCtrlSubs.unsubscribe();
   }
 }

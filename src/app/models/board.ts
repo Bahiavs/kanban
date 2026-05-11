@@ -38,6 +38,14 @@ export class Board {
     });
   }
 
+  editTaskPriority(id: string, priority: Priority) {
+    this._tasks.update(tasks => {
+      const task = tasks.find(t => t.id === id);
+      if (task) task.priority = priority;
+      return [...tasks];
+    });
+  }
+
   deleteTask(id: string) {
     this._tasks.update(tasks => tasks.filter((task) => task.id !== id))
   }
