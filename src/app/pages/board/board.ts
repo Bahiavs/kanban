@@ -18,7 +18,7 @@ import { JsonPipe } from '@angular/common';
         @for (task of todoTasks(); track task.id) {
           <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
             <div>Title: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
-            <div>Description: {{ task.description }}</div>
+            <div>Description: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
             <div>Priority: {{ task.priority }}</div>
             <div>Created at: {{ task.createdAt }}</div>
             <button (click)="board.deleteTask(task.id)">Deletar</button>
@@ -36,7 +36,7 @@ import { JsonPipe } from '@angular/common';
         @for (task of doingTasks(); track task.id) {
           <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
             <div>Title: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
-            <div>Description: {{ task.description }}</div>
+            <div>Description: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
             <div>Priority: {{ task.priority }}</div>
             <div>Created at: {{ task.createdAt }}</div>
             <button (click)="board.deleteTask(task.id)">Deletar</button>
@@ -54,7 +54,7 @@ import { JsonPipe } from '@angular/common';
         @for (task of doneTasks(); track task.id) {
           <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
             <div>Title: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
-            <div>Description: {{ task.description }}</div>
+            <div>Description: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
             <div>Priority: {{ task.priority }}</div>
             <div>Created at: {{ task.createdAt }}</div>
             <button (click)="board.deleteTask(task.id)">Deletar</button>
@@ -99,7 +99,23 @@ export class BoardComponent implements OnDestroy {
     return titleCtrlByTaskId;
   });
 
+  private descriptionCtrlSubs = new Subscription();
+  protected readonly descriptionCtrlByTaskId = computed(() => {
+    const tasks = this.board.tasks();
+    this.descriptionCtrlSubs.unsubscribe();
+    this.descriptionCtrlSubs = new Subscription();
+    const descriptionCtrlByTaskId: Record<string, FormControl<string>> = {};
+    for (const task of tasks) {
+      const ctrl = new FormControl(task.description, { nonNullable: true });
+      descriptionCtrlByTaskId[task.id] = ctrl;
+      const sub = ctrl.valueChanges.subscribe((value) => this.board.editTaskDescription(task.id, value));
+      this.descriptionCtrlSubs.add(sub);
+    }
+    return descriptionCtrlByTaskId;
+  });
+
   ngOnDestroy() {
     this.titleCtrlSubs.unsubscribe();
+    this.descriptionCtrlSubs.unsubscribe();
   }
 }

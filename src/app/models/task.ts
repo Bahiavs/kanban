@@ -7,7 +7,7 @@ export class Task {
 
   constructor(
     public title: string,
-    readonly description: string,
+    public description: string,
     readonly priority: Priority,
     readonly status: Status,
   ) {}

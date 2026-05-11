@@ -30,6 +30,14 @@ export class Board {
     });
   }
 
+  editTaskDescription(id: string, description: string) {
+    this._tasks.update(tasks => {
+      const task = tasks.find(t => t.id === id);
+      if (task) task.description = description;
+      return [...tasks];
+    });
+  }
+
   deleteTask(id: string) {
     this._tasks.update(tasks => tasks.filter((task) => task.id !== id))
   }
