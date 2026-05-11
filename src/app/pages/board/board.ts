@@ -1,15 +1,17 @@
 import { Component, computed, OnDestroy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { CdkDragDrop, CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { Board } from '../../models/board';
 import { Priority } from '../../models/priority';
 import { Status } from '../../models/status';
+import { Task } from '../../models/task';
 import { Subscription } from 'rxjs';
 import { JsonPipe } from '@angular/common';
 
 @Component({
   selector: 'app-board',
-  imports: [ReactiveFormsModule, JsonPipe],
+  imports: [ReactiveFormsModule, JsonPipe, CdkDropList, CdkDrag],
   template: `
     <input type="text" [formControl]="filterCtrl" placeholder="Filtrar por título ou descrição" />
 
@@ -21,91 +23,58 @@ import { JsonPipe } from '@angular/common';
     </select>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; align-items: start">
-      <div style="border: 1px solid white; padding: .5rem">
-        <div style="display: flex; justify-content: space-between">
-          <div style="text-align: center">A Fazer</div>
-          <div>Total: {{ todoTasks().length }}</div>
-        </div>
-        @for (task of todoTasks(); track task.id) {
-          <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
-            <div>Título: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
-            <div>Descrição: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
-            <div>
-              Prioridade:
-              <select [formControl]="priorityCtrlByTaskId()[task.id]">
-                @for (p of priorities; track p) {
-                  <option [value]="p">{{ p }}</option>
-                }
-              </select>
-            </div>
-            <div>Criado em: {{ task.createdAt }}</div>
-            <button (click)="board.deleteTask(task.id)">Deletar</button>
+      @for (col of columns; track col.status) {
+        <div
+          cdkDropList
+          [id]="col.status"
+          [cdkDropListData]="col.status"
+          [cdkDropListConnectedTo]="connectedTo(col.status)"
+          (cdkDropListDropped)="onDrop($event)"
+          style="border: 1px solid white; padding: .5rem"
+        >
+          <div style="display: flex; justify-content: space-between">
+            <div style="text-align: center">{{ col.label }}</div>
+            <div>Total: {{ tasksByStatus()[col.status]?.length ?? 0 }}</div>
           </div>
-        }
-        <button (click)="board.createTask(Status.Todo)" style="margin-top: .5rem; float: right">
-          Criar tarefa
-        </button>
-      </div>
-      <div style="border: 1px solid white; padding: .5rem">
-        <div style="display: flex; justify-content: space-between">
-          <div style="text-align: center">Em Progresso</div>
-          <div>Total: {{ doingTasks().length }}</div>
-        </div>
-        @for (task of doingTasks(); track task.id) {
-          <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
-            <div>Título: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
-            <div>Descrição: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
-            <div>
-              Prioridade:
-              <select [formControl]="priorityCtrlByTaskId()[task.id]">
-                @for (p of priorities; track p) {
-                  <option [value]="p">{{ p }}</option>
-                }
-              </select>
+          @for (task of tasksByStatus()[col.status] ?? []; track task.id) {
+            <div
+              style="border: 1px solid white; padding: .5rem; margin-top: .5rem; cursor: grab"
+              cdkDrag
+              [cdkDragData]="task"
+            >
+              <div>Título: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
+              <div>Descrição: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
+              <div>
+                Prioridade:
+                <select [formControl]="priorityCtrlByTaskId()[task.id]">
+                  @for (p of priorities; track p) {
+                    <option [value]="p">{{ p }}</option>
+                  }
+                </select>
+              </div>
+              <div>Criado em: {{ task.createdAt }}</div>
+              <button (click)="board.deleteTask(task.id)">Deletar</button>
             </div>
-            <div>Criado em: {{ task.createdAt }}</div>
-            <button (click)="board.deleteTask(task.id)">Deletar</button>
-          </div>
-        }
-        <button (click)="board.createTask(Status.Doing)" style="margin-top: .5rem; float: right">
-          Criar tarefa
-        </button>
-      </div>
-      <div style="border: 1px solid white; padding: .5rem">
-        <div style="display: flex; justify-content: space-between">
-          <div style="text-align: center">Concluído</div>
-          <div>Total: {{ doneTasks().length }}</div>
+          }
+          <button (click)="board.createTask(col.status)" style="margin-top: .5rem; float: right">
+            Criar tarefa
+          </button>
         </div>
-        @for (task of doneTasks(); track task.id) {
-          <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
-            <div>Título: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
-            <div>Descrição: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
-            <div>
-              Prioridade:
-              <select [formControl]="priorityCtrlByTaskId()[task.id]">
-                @for (p of priorities; track p) {
-                  <option [value]="p">{{ p }}</option>
-                }
-              </select>
-            </div>
-            <div>Criado em: {{ task.createdAt }}</div>
-            <button (click)="board.deleteTask(task.id)">Deletar</button>
-          </div>
-        }
-        <button (click)="board.createTask(Status.Done)" style="margin-top: .5rem; float: right">
-          Criar tarefa
-        </button>
-      </div>
+      }
     </div>
 
     <pre>{{ board.tasks() | json }}</pre>
   `,
 })
 export class BoardComponent implements OnDestroy {
-  protected readonly Status = Status;
   protected readonly priorities = Object.values(Priority);
-
   protected readonly board = new Board();
+
+  protected readonly columns = [
+    { status: Status.Todo, label: 'A Fazer' },
+    { status: Status.Doing, label: 'Em Progresso' },
+    { status: Status.Done, label: 'Concluído' },
+  ];
 
   protected readonly filterCtrl = new FormControl('', { nonNullable: true });
   private readonly filterValue = toSignal(this.filterCtrl.valueChanges, {
@@ -120,22 +89,24 @@ export class BoardComponent implements OnDestroy {
   protected readonly filteredTasks = computed(() => {
     const query = this.filterValue().toLowerCase().trim();
     const priority = this.filterPriority();
-    return this.board.tasks().filter(
-      (task) =>
-        (!query || task.title.toLowerCase().includes(query) || task.description.toLowerCase().includes(query)) &&
-        (!priority || task.priority === priority),
-    );
+    return this.board
+      .tasks()
+      .filter(
+        (task) =>
+          (!query ||
+            task.title.toLowerCase().includes(query) ||
+            task.description.toLowerCase().includes(query)) &&
+          (!priority || task.priority === priority),
+      );
   });
 
-  protected readonly todoTasks = computed(() =>
-    this.filteredTasks().filter((task) => task.status === Status.Todo),
-  );
-  protected readonly doingTasks = computed(() =>
-    this.filteredTasks().filter((task) => task.status === Status.Doing),
-  );
-  protected readonly doneTasks = computed(() =>
-    this.filteredTasks().filter((task) => task.status === Status.Done),
-  );
+  protected readonly tasksByStatus = computed(() => {
+    const grouped: Partial<Record<Status, Task[]>> = {};
+    for (const task of this.filteredTasks()) {
+      (grouped[task.status] ??= []).push(task);
+    }
+    return grouped;
+  });
 
   private titleCtrlSubs = new Subscription();
   protected readonly titleCtrlByTaskId = computed(() => {
@@ -190,5 +161,15 @@ export class BoardComponent implements OnDestroy {
     this.titleCtrlSubs.unsubscribe();
     this.descriptionCtrlSubs.unsubscribe();
     this.priorityCtrlSubs.unsubscribe();
+  }
+
+  connectedTo(status: Status): Status[] {
+    return Object.values(Status).filter((s) => s !== status);
+  }
+
+  onDrop(event: CdkDragDrop<Status, Status, Task>) {
+    if (event.previousContainer !== event.container) {
+      this.board.changeTaskStatus(event.item.data.id, event.container.data);
+    }
   }
 }

@@ -50,8 +50,12 @@ export class Board {
     this._tasks.update(tasks => tasks.filter((task) => task.id !== id))
   }
 
-  changeTaskStatus() {
-    // todo
+  changeTaskStatus(id: string, status: Status) {
+    this._tasks.update(tasks => {
+      const task = tasks.find(t => t.id === id);
+      if (task) task.status = status;
+      return [...tasks];
+    });
   }
 
   searchByTitleOrDescription() {

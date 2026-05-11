@@ -9,6 +9,6 @@ export class Task {
     public title: string,
     public description: string,
     public priority: Priority,
-    readonly status: Status,
+    public status: Status,
   ) {}
 }
