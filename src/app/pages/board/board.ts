@@ -1,4 +1,5 @@
 import { Component, computed, OnDestroy } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Board } from '../../models/board';
 import { Priority } from '../../models/priority';
@@ -10,6 +11,8 @@ import { JsonPipe } from '@angular/common';
   selector: 'app-board',
   imports: [ReactiveFormsModule, JsonPipe],
   template: `
+    <input type="text" [formControl]="filterCtrl" placeholder="Filtrar por título ou descrição" />
+
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; align-items: start">
       <div style="border: 1px solid white; padding: .5rem">
         <div style="display: flex; justify-content: space-between">
@@ -20,7 +23,8 @@ import { JsonPipe } from '@angular/common';
           <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
             <div>Title: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
             <div>Description: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
-            <div>Priority:
+            <div>
+              Priority:
               <select [formControl]="priorityCtrlByTaskId()[task.id]">
                 @for (p of priorities; track p) {
                   <option [value]="p">{{ p }}</option>
@@ -44,7 +48,8 @@ import { JsonPipe } from '@angular/common';
           <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
             <div>Title: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
             <div>Description: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
-            <div>Priority:
+            <div>
+              Priority:
               <select [formControl]="priorityCtrlByTaskId()[task.id]">
                 @for (p of priorities; track p) {
                   <option [value]="p">{{ p }}</option>
@@ -68,7 +73,8 @@ import { JsonPipe } from '@angular/common';
           <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
             <div>Title: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
             <div>Description: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
-            <div>Priority:
+            <div>
+              Priority:
               <select [formControl]="priorityCtrlByTaskId()[task.id]">
                 @for (p of priorities; track p) {
                   <option [value]="p">{{ p }}</option>
@@ -94,14 +100,31 @@ export class BoardComponent implements OnDestroy {
 
   protected readonly board = new Board();
 
-  readonly todoTasks = computed(() =>
-    this.board.tasks().filter((task) => task.status === Status.Todo),
+  protected readonly filterCtrl = new FormControl('', { nonNullable: true });
+  private readonly filterValue = toSignal(this.filterCtrl.valueChanges, {
+    initialValue: this.filterCtrl.value,
+  });
+
+  protected readonly filteredTasks = computed(() => {
+    const query = this.filterValue().toLowerCase().trim();
+    if (!query) return this.board.tasks();
+    return this.board
+      .tasks()
+      .filter(
+        (task) =>
+          task.title.toLowerCase().includes(query) ||
+          task.description.toLowerCase().includes(query),
+      );
+  });
+
+  protected readonly todoTasks = computed(() =>
+    this.filteredTasks().filter((task) => task.status === Status.Todo),
   );
-  readonly doingTasks = computed(() =>
-    this.board.tasks().filter((task) => task.status === Status.Doing),
+  protected readonly doingTasks = computed(() =>
+    this.filteredTasks().filter((task) => task.status === Status.Doing),
   );
-  readonly doneTasks = computed(() =>
-    this.board.tasks().filter((task) => task.status === Status.Done),
+  protected readonly doneTasks = computed(() =>
+    this.filteredTasks().filter((task) => task.status === Status.Done),
   );
 
   private titleCtrlSubs = new Subscription();
@@ -128,7 +151,9 @@ export class BoardComponent implements OnDestroy {
     for (const task of tasks) {
       const ctrl = new FormControl(task.description, { nonNullable: true });
       descriptionCtrlByTaskId[task.id] = ctrl;
-      const sub = ctrl.valueChanges.subscribe((value) => this.board.editTaskDescription(task.id, value));
+      const sub = ctrl.valueChanges.subscribe((value) =>
+        this.board.editTaskDescription(task.id, value),
+      );
       this.descriptionCtrlSubs.add(sub);
     }
     return descriptionCtrlByTaskId;
@@ -143,7 +168,9 @@ export class BoardComponent implements OnDestroy {
     for (const task of tasks) {
       const ctrl = new FormControl(task.priority, { nonNullable: true });
       priorityCtrlByTaskId[task.id] = ctrl;
-      const sub = ctrl.valueChanges.subscribe((value) => this.board.editTaskPriority(task.id, value));
+      const sub = ctrl.valueChanges.subscribe((value) =>
+        this.board.editTaskPriority(task.id, value),
+      );
       this.priorityCtrlSubs.add(sub);
     }
     return priorityCtrlByTaskId;
