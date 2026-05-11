@@ -25,8 +25,9 @@ export class Board {
     this.tasks().filter((task) => task.status === Status.Done)
   )
 
-  createTask() {
-    // todo
+  createTask(status: Status) {
+    const task = new Task('', '', Priority.Low, status)
+    this.tasks.update((tasks) => [...tasks, task]);
   }
 
   editTask() {
