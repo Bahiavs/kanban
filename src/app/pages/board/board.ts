@@ -16,22 +16,22 @@ import { JsonPipe } from '@angular/common';
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; align-items: start">
       <div style="border: 1px solid white; padding: .5rem">
         <div style="display: flex; justify-content: space-between">
-          <div style="text-align: center">Todo</div>
+          <div style="text-align: center">A Fazer</div>
           <div>Total: {{ todoTasks().length }}</div>
         </div>
         @for (task of todoTasks(); track task.id) {
           <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
-            <div>Title: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
-            <div>Description: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
+            <div>Título: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
+            <div>Descrição: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
             <div>
-              Priority:
+              Prioridade:
               <select [formControl]="priorityCtrlByTaskId()[task.id]">
                 @for (p of priorities; track p) {
                   <option [value]="p">{{ p }}</option>
                 }
               </select>
             </div>
-            <div>Created at: {{ task.createdAt }}</div>
+            <div>Criado em: {{ task.createdAt }}</div>
             <button (click)="board.deleteTask(task.id)">Deletar</button>
           </div>
         }
@@ -41,22 +41,22 @@ import { JsonPipe } from '@angular/common';
       </div>
       <div style="border: 1px solid white; padding: .5rem">
         <div style="display: flex; justify-content: space-between">
-          <div style="text-align: center">Doing</div>
+          <div style="text-align: center">Em Progresso</div>
           <div>Total: {{ doingTasks().length }}</div>
         </div>
         @for (task of doingTasks(); track task.id) {
           <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
-            <div>Title: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
-            <div>Description: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
+            <div>Título: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
+            <div>Descrição: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
             <div>
-              Priority:
+              Prioridade:
               <select [formControl]="priorityCtrlByTaskId()[task.id]">
                 @for (p of priorities; track p) {
                   <option [value]="p">{{ p }}</option>
                 }
               </select>
             </div>
-            <div>Created at: {{ task.createdAt }}</div>
+            <div>Criado em: {{ task.createdAt }}</div>
             <button (click)="board.deleteTask(task.id)">Deletar</button>
           </div>
         }
@@ -66,22 +66,22 @@ import { JsonPipe } from '@angular/common';
       </div>
       <div style="border: 1px solid white; padding: .5rem">
         <div style="display: flex; justify-content: space-between">
-          <div style="text-align: center">Done</div>
+          <div style="text-align: center">Concluído</div>
           <div>Total: {{ doneTasks().length }}</div>
         </div>
         @for (task of doneTasks(); track task.id) {
           <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
-            <div>Title: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
-            <div>Description: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
+            <div>Título: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
+            <div>Descrição: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
             <div>
-              Priority:
+              Prioridade:
               <select [formControl]="priorityCtrlByTaskId()[task.id]">
                 @for (p of priorities; track p) {
                   <option [value]="p">{{ p }}</option>
                 }
               </select>
             </div>
-            <div>Created at: {{ task.createdAt }}</div>
+            <div>Criado em: {{ task.createdAt }}</div>
             <button (click)="board.deleteTask(task.id)">Deletar</button>
           </div>
         }
