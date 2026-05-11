@@ -1,20 +1,23 @@
-import { Component } from '@angular/core';
+import { Component, computed, OnDestroy } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Board } from '../../models/board';
 import { Status } from '../../models/status';
+import { Subscription } from 'rxjs';
+import { JsonPipe } from '@angular/common';
 
 @Component({
   selector: 'app-board',
-  imports: [],
+  imports: [ReactiveFormsModule, JsonPipe],
   template: `
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; align-items: start">
       <div style="border: 1px solid white; padding: .5rem">
         <div style="display: flex; justify-content: space-between">
           <div style="text-align: center">Todo</div>
-          <div>Total: {{ board.todoTasks().length }}</div>
+          <div>Total: {{ todoTasks().length }}</div>
         </div>
-        @for (task of board.todoTasks(); track task.id) {
+        @for (task of todoTasks(); track task.id) {
           <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
-            <div>Title: {{ task.title }}</div>
+            <div>Title: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
             <div>Description: {{ task.description }}</div>
             <div>Priority: {{ task.priority }}</div>
             <div>Created at: {{ task.createdAt }}</div>
@@ -28,11 +31,11 @@ import { Status } from '../../models/status';
       <div style="border: 1px solid white; padding: .5rem">
         <div style="display: flex; justify-content: space-between">
           <div style="text-align: center">Doing</div>
-          <div>Total: {{ board.doingTasks().length }}</div>
+          <div>Total: {{ doingTasks().length }}</div>
         </div>
-        @for (task of board.doingTasks(); track task.id) {
+        @for (task of doingTasks(); track task.id) {
           <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
-            <div>Title: {{ task.title }}</div>
+            <div>Title: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
             <div>Description: {{ task.description }}</div>
             <div>Priority: {{ task.priority }}</div>
             <div>Created at: {{ task.createdAt }}</div>
@@ -46,11 +49,11 @@ import { Status } from '../../models/status';
       <div style="border: 1px solid white; padding: .5rem">
         <div style="display: flex; justify-content: space-between">
           <div style="text-align: center">Done</div>
-          <div>Total: {{ board.doneTasks().length }}</div>
+          <div>Total: {{ doneTasks().length }}</div>
         </div>
-        @for (task of board.doneTasks(); track task.id) {
+        @for (task of doneTasks(); track task.id) {
           <div style="border: 1px solid white; padding: .5rem; margin-top: .5rem">
-            <div>Title: {{ task.title }}</div>
+            <div>Title: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
             <div>Description: {{ task.description }}</div>
             <div>Priority: {{ task.priority }}</div>
             <div>Created at: {{ task.createdAt }}</div>
@@ -62,9 +65,41 @@ import { Status } from '../../models/status';
         </button>
       </div>
     </div>
+
+    <pre>{{ board.tasks() | json }}</pre>
   `,
 })
-export class BoardComponent {
-  protected readonly board = new Board();
+export class BoardComponent implements OnDestroy {
   protected readonly Status = Status;
+
+  protected readonly board = new Board();
+
+  readonly todoTasks = computed(() =>
+    this.board.tasks().filter((task) => task.status === Status.Todo),
+  );
+  readonly doingTasks = computed(() =>
+    this.board.tasks().filter((task) => task.status === Status.Doing),
+  );
+  readonly doneTasks = computed(() =>
+    this.board.tasks().filter((task) => task.status === Status.Done),
+  );
+
+  private titleCtrlSubs = new Subscription();
+  protected readonly titleCtrlByTaskId = computed(() => {
+    const tasks = this.board.tasks();
+    this.titleCtrlSubs.unsubscribe();
+    this.titleCtrlSubs = new Subscription();
+    const titleCtrlByTaskId: Record<string, FormControl<string>> = {};
+    for (const task of tasks) {
+      const ctrl = new FormControl(task.title, { nonNullable: true });
+      titleCtrlByTaskId[task.id] = ctrl;
+      const sub = ctrl.valueChanges.subscribe((value) => this.board.editTaskTitle(task.id, value));
+      this.titleCtrlSubs.add(sub);
+    }
+    return titleCtrlByTaskId;
+  });
+
+  ngOnDestroy() {
+    this.titleCtrlSubs.unsubscribe();
+  }
 }

@@ -6,7 +6,7 @@ export class Task {
   readonly createdAt = new Date();
 
   constructor(
-    readonly title: string,
+    public title: string,
     readonly description: string,
     readonly priority: Priority,
     readonly status: Status,

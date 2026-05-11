@@ -4,7 +4,7 @@ import { Status } from './status';
 import { Task } from './task';
 
 export class Board {
-  private readonly tasks = signal<Task[]>([
+  private readonly _tasks = signal<Task[]>([
     new Task('Design wireframes', 'Create low-fidelity wireframes for the new dashboard', Priority.High, Status.Todo),
     new Task('Write unit tests', 'Add coverage for the authentication module', Priority.Medium, Status.Todo),
     new Task('Update README', 'Document the new setup steps for local development', Priority.Low, Status.Todo),
@@ -15,27 +15,23 @@ export class Board {
     new Task('Create color tokens', 'Define the design system color variables in the theme file', Priority.Medium, Status.Done),
     new Task('Add loading spinner', 'Show a spinner while async data is being fetched', Priority.Low, Status.Done),
   ])
-  readonly todoTasks = computed(() =>
-    this.tasks().filter((task) => task.status === Status.Todo)
-  )
-  readonly doingTasks = computed(() =>
-    this.tasks().filter((task) => task.status === Status.Doing)
-  )
-  readonly doneTasks = computed(() =>
-    this.tasks().filter((task) => task.status === Status.Done)
-  )
+  readonly tasks = this._tasks.asReadonly()
 
   createTask(status: Status) {
     const task = new Task('', '', Priority.Low, status)
-    this.tasks.update((tasks) => [...tasks, task]);
+    this._tasks.update((tasks) => [...tasks, task]);
   }
 
-  editTask() {
-    // todo
+  editTaskTitle(id: string, title: string) {
+    this._tasks.update(tasks => {
+      const task = tasks.find(t => t.id === id);
+      if (task) task.title = title;
+      return [...tasks];
+    });
   }
 
   deleteTask(id: string) {
-    this.tasks.update(tasks => tasks.filter((task) => task.id !== id))
+    this._tasks.update(tasks => tasks.filter((task) => task.id !== id))
   }
 
   changeTaskStatus() {
