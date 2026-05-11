@@ -13,6 +13,13 @@ import { JsonPipe } from '@angular/common';
   template: `
     <input type="text" [formControl]="filterCtrl" placeholder="Filtrar por título ou descrição" />
 
+    <select [formControl]="filterPriorityCtrl">
+      <option value="">Todas as prioridades</option>
+      @for (p of priorities; track p) {
+        <option [value]="p">{{ p }}</option>
+      }
+    </select>
+
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; align-items: start">
       <div style="border: 1px solid white; padding: .5rem">
         <div style="display: flex; justify-content: space-between">
@@ -105,16 +112,19 @@ export class BoardComponent implements OnDestroy {
     initialValue: this.filterCtrl.value,
   });
 
+  protected readonly filterPriorityCtrl = new FormControl<Priority | ''>('', { nonNullable: true });
+  private readonly filterPriority = toSignal(this.filterPriorityCtrl.valueChanges, {
+    initialValue: this.filterPriorityCtrl.value,
+  });
+
   protected readonly filteredTasks = computed(() => {
     const query = this.filterValue().toLowerCase().trim();
-    if (!query) return this.board.tasks();
-    return this.board
-      .tasks()
-      .filter(
-        (task) =>
-          task.title.toLowerCase().includes(query) ||
-          task.description.toLowerCase().includes(query),
-      );
+    const priority = this.filterPriority();
+    return this.board.tasks().filter(
+      (task) =>
+        (!query || task.title.toLowerCase().includes(query) || task.description.toLowerCase().includes(query)) &&
+        (!priority || task.priority === priority),
+    );
   });
 
   protected readonly todoTasks = computed(() =>
