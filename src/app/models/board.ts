@@ -18,7 +18,7 @@ export class Board {
   readonly tasks = this._tasks.asReadonly()
 
   createTask(status: Status) {
-    const task = new Task('', '', Priority.Low, status)
+    const task = new Task('Nova Tarefa', '', Priority.Low, status)
     this._tasks.update((tasks) => [...tasks, task]);
   }
 
