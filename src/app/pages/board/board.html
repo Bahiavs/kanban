@@ -59,13 +59,16 @@
                 style="flex-grow: 1; height: 5em; background: transparent;border-radius: 8px; padding: .5em"
               ></textarea>
             </div>
-            <div style="display: flex; gap: 1em; margin-top: .5rem;">
+            <div style="display: flex; gap: 1em; margin-top: 1rem;">
               <div>Prioridade:</div>
-              <select [formControl]="priorityCtrlByTaskId()[task.id]">
-                @for (p of priorities; track p) {
-                  <option [value]="p">{{ p }}</option>
-                }
-              </select>
+              <div style="display: inline-grid">
+                <select [formControl]="priorityCtrlByTaskId()[task.id]" style="grid-area: 1/1">
+                  @for (p of priorities; track p) {
+                    <option [value]="p">{{ p }}</option>
+                  }
+                </select>
+                <span style="grid-area: 1/1; visibility: hidden; pointer-events: none; padding: 0 1.5em 0 0.5em; white-space: pre">{{ priorityCtrlByTaskId()[task.id].value }}</span>
+              </div>
               <button (click)="onViewTask(task.id)" style="margin-left: auto">
                 Ver Detalhes
               </button>
