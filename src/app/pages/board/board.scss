@@ -67,6 +67,9 @@
 .create-task-btn {
   margin-top: 1rem;
   float: right;
+  padding: .8em;
+  border-radius: 4px;
+  border: none;
 }
 
 input {
@@ -78,5 +81,10 @@ input {
 select {
   background: black;
   border-radius: 4px;
+}
 
+button {
+  border: none;
+  cursor: pointer;
+  border-radius: 4px
 }
