@@ -31,43 +31,46 @@
             class="task-card"
           >
             <div>
-              <div>
-                Título:
+              <div style="display: flex; gap: 1em">
+                <div>Título:</div>
                 <input
                   [formControl]="titleCtrlByTaskId()[task.id]"
                   (blur)="onTitleBlur(task.id, task)"
+                  style="flex-grow: 1"
                 />
+                @if (titleCtrlByTaskId()[task.id].hasError('minlength')) {
+                  <span style="color: red">
+                    (mínimo {{ titleCtrlByTaskId()[task.id].getError('minlength')?.requiredLength }})
+                  </span>
+                }
               </div>
-              @if (titleCtrlByTaskId()[task.id].hasError('minlength')) {
-                <span style="color: red">
-                  (mínimo {{ titleCtrlByTaskId()[task.id].getError('minlength')?.requiredLength }})
-                </span>
-              }
             </div>
-            <div>
+            <div style="display: flex; gap: 1em; margin-top: .5rem;">
               <div>
-                Descrição:
-                <textarea
-                  [formControl]="descriptionCtrlByTaskId()[task.id]"
-                  [maxlength]="maxDescriptionChar"
-                  (blur)="onDescriptionBlur(task.id, task)"
-                ></textarea>
+                <div>Descrição:</div>
+                <div style="text-align: right; font-size: .8rem">
+                  {{ descriptionCtrlByTaskId()[task.id].value.length }}/{{ maxDescriptionChar }}
+                </div>
               </div>
-              <span class="char-count">
-              {{ descriptionCtrlByTaskId()[task.id].value.length }}/{{ maxDescriptionChar }}
-            </span>
+              <textarea
+                [formControl]="descriptionCtrlByTaskId()[task.id]"
+                [maxlength]="maxDescriptionChar"
+                (blur)="onDescriptionBlur(task.id, task)"
+                style="flex-grow: 1; height: 5em"
+              ></textarea>
             </div>
-            <div>
-              Prioridade:
+            <div style="display: flex; gap: 1em; margin-top: .5rem;">
+              <div>Prioridade:</div>
               <select [formControl]="priorityCtrlByTaskId()[task.id]">
                 @for (p of priorities; track p) {
                   <option [value]="p">{{ p }}</option>
                 }
               </select>
+              <button (click)="onViewTask(task.id)" style="margin-left: auto">
+                Ver Detalhes
+              </button>
+              <button (click)="onDeleteTask(task.id)">Deletar</button>
             </div>
-            <div>Criado em: {{ task.createdAt }}</div>
-            <button (click)="onViewTask(task.id)">Ver Detalhes</button>
-            <button (click)="onDeleteTask(task.id)">Deletar</button>
           </div>
         }
       </div>
