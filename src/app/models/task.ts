@@ -9,9 +9,11 @@ export class Task {
       taskData.priority,
       taskData.status,
       taskData.id,
-      new Date(taskData.createdAt)
-    )
+      new Date(taskData.createdAt),
+    );
   }
+
+  static readonly minTitleChar = 3;
 
   constructor(
     public title: string,
@@ -19,8 +21,17 @@ export class Task {
     public priority: Priority,
     public status: Status,
     readonly id: string = crypto.randomUUID(),
-    readonly createdAt = new Date()
-  ) {}
+    readonly createdAt = new Date(),
+  ) {
+    if (title.length < Task.minTitleChar)
+      throw `title must have at leas ${Task.minTitleChar} chars`;
+  }
+
+  setTitle(title: string) {
+    if (title.length < Task.minTitleChar)
+      throw `title must have at least ${Task.minTitleChar} chars`;
+    this.title = title;
+  }
 
   toData(): TaskData {
     return {

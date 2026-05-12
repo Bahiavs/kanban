@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, OnDestroy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CdkDragDrop, CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { Board } from '../../models/board';
 import { Priority } from '../../models/priority';
@@ -43,7 +43,14 @@ import { BoardRepository } from '../../repositories/board.repository';
               cdkDrag
               [cdkDragData]="task"
             >
-              <div>Título: <input [formControl]="titleCtrlByTaskId()[task.id]" /></div>
+              <div>
+                Título: <input [formControl]="titleCtrlByTaskId()[task.id]" />
+                @if (titleCtrlByTaskId()[task.id].hasError('minlength')) {
+                  <span style="color: red; font-size: 0.875rem">
+                    Mínimo de {{ titleCtrlByTaskId()[task.id].getError('minlength')?.requiredLength }} caracteres
+                  </span>
+                }
+              </div>
               <div>Descrição: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
               <div>
                 Prioridade:
@@ -118,7 +125,10 @@ export class BoardComponent implements OnDestroy {
     this.titleCtrlSubs = new Subscription();
     const titleCtrlByTaskId: Record<string, FormControl<string>> = {};
     for (const task of tasks) {
-      const ctrl = new FormControl(task.title, { nonNullable: true });
+      const ctrl = new FormControl(task.title, {
+        nonNullable: true,
+        validators: Validators.minLength(Task.minTitleChar),
+      });
       titleCtrlByTaskId[task.id] = ctrl;
       const sub = ctrl.valueChanges.subscribe((value) => this.board.editTaskTitle(task.id, value));
       this.titleCtrlSubs.add(sub);

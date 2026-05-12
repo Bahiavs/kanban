@@ -19,7 +19,12 @@ export class Board {
   editTaskTitle(id: string, title: string) {
     this._tasks.update((tasks) => {
       const task = tasks.find((t) => t.id === id);
-      if (task) task.title = title;
+      if (!task) return tasks;
+      try {
+        task.setTitle(title);
+      } catch (error) {
+        console.error(error);
+      }
       return [...tasks];
     });
   }
@@ -53,7 +58,7 @@ export class Board {
   }
 
   toData() {
-    return this._tasks().map(task => task.toData());
+    return this._tasks().map((task) => task.toData());
   }
 }
 
