@@ -44,22 +44,38 @@ import { BoardRepository } from '../../repositories/board.repository';
               [cdkDragData]="task"
             >
               <div>
-                Título:
-                <input
-                  [formControl]="titleCtrlByTaskId()[task.id]"
-                  (blur)="onTitleBlur(task.id, task)"
-                />
-                @if (titleCtrlByTaskId()[task.id].hasError('minlength')) {
-                  <span style="color: red; font-size: 0.875rem">
-                    Mínimo de
-                    {{
-                      titleCtrlByTaskId()[task.id].getError('minlength')?.requiredLength
-                    }}
-                    caracteres
-                  </span>
-                }
+                <div>
+                  Título:
+                  <input
+                    [formControl]="titleCtrlByTaskId()[task.id]"
+                    (blur)="onTitleBlur(task.id, task)"
+                  />
+                </div>
+                <div style="font-size: 0.875rem">
+                  {{ titleCtrlByTaskId()[task.id].value.length }} caracteres
+                  @if (titleCtrlByTaskId()[task.id].hasError('minlength')) {
+                    <span style="color: red">
+                      (mínimo
+                      {{ titleCtrlByTaskId()[task.id].getError('minlength')?.requiredLength }})
+                    </span>
+                  }
+                </div>
               </div>
-              <div>Descrição: <input [formControl]="descriptionCtrlByTaskId()[task.id]" /></div>
+              <div>
+                <div>
+                  Descrição:
+                  <input
+                    [formControl]="descriptionCtrlByTaskId()[task.id]"
+                    [maxlength]="maxDescriptionChar"
+                    (blur)="onDescriptionBlur(task.id, task)"
+                  />
+                </div>
+                <span style="font-size: 0.875rem"
+                  >{{ descriptionCtrlByTaskId()[task.id].value.length }}/{{
+                    maxDescriptionChar
+                  }}</span
+                >
+              </div>
               <div>
                 Prioridade:
                 <select [formControl]="priorityCtrlByTaskId()[task.id]">
@@ -88,6 +104,8 @@ export class BoardComponent implements OnDestroy {
   protected readonly board = this.boardRepository.get() ?? new Board([]);
   protected readonly priorities = Object.values(Priority);
 
+  protected readonly maxDescriptionChar = Task.maxDescriptionChar;
+  protected readonly minTitleChar = Task.minTitleChar;
   protected readonly columns = [
     { status: Status.Todo, label: 'A Fazer' },
     { status: Status.Doing, label: 'Em Progresso' },
@@ -145,22 +163,24 @@ export class BoardComponent implements OnDestroy {
     else ctrl.reset(task.title);
   }
 
-  private descriptionCtrlSubs = new Subscription();
   protected readonly descriptionCtrlByTaskId = computed(() => {
     const tasks = this.board.tasks();
-    this.descriptionCtrlSubs.unsubscribe();
-    this.descriptionCtrlSubs = new Subscription();
     const descriptionCtrlByTaskId: Record<string, FormControl<string>> = {};
     for (const task of tasks) {
-      const ctrl = new FormControl(task.description, { nonNullable: true });
+      const ctrl = new FormControl(task.description, {
+        nonNullable: true,
+        validators: Validators.maxLength(Task.maxDescriptionChar),
+      });
       descriptionCtrlByTaskId[task.id] = ctrl;
-      const sub = ctrl.valueChanges.subscribe((value) =>
-        this.board.editTaskDescription(task.id, value),
-      );
-      this.descriptionCtrlSubs.add(sub);
     }
     return descriptionCtrlByTaskId;
   });
+
+  onDescriptionBlur(taskId: string, task: Task) {
+    const ctrl = this.descriptionCtrlByTaskId()[taskId];
+    if (ctrl.valid) this.board.editTaskDescription(taskId, ctrl.value);
+    else ctrl.reset(task.description);
+  }
 
   private priorityCtrlSubs = new Subscription();
   protected readonly priorityCtrlByTaskId = computed(() => {
@@ -185,7 +205,6 @@ export class BoardComponent implements OnDestroy {
   });
 
   ngOnDestroy() {
-    this.descriptionCtrlSubs.unsubscribe();
     this.priorityCtrlSubs.unsubscribe();
   }
 

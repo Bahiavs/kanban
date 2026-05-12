@@ -14,6 +14,7 @@ export class Task {
   }
 
   static readonly minTitleChar = 3;
+  static readonly maxDescriptionChar = 500;
 
   constructor(
     public title: string,
@@ -31,6 +32,12 @@ export class Task {
     if (title.length < Task.minTitleChar)
       throw `title must have at least ${Task.minTitleChar} chars`;
     this.title = title;
+  }
+
+  setDescription(description: string) {
+    if (description.length > Task.maxDescriptionChar)
+      throw `description must have at most ${Task.maxDescriptionChar} chars`;
+    this.description = description;
   }
 
   toData(): TaskData {

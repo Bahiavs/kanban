@@ -32,7 +32,12 @@ export class Board {
   editTaskDescription(id: string, description: string) {
     this._tasks.update((tasks) => {
       const task = tasks.find((t) => t.id === id);
-      if (task) task.description = description;
+      if (!task) return tasks;
+      try {
+        task.setDescription(description);
+      } catch (error) {
+        console.error(error);
+      }
       return [...tasks];
     });
   }
