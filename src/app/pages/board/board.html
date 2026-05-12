@@ -1,0 +1,79 @@
+<input type="text" [formControl]="filterCtrl" placeholder="Filtrar por título ou descrição" />
+
+<select [formControl]="filterPriorityCtrl">
+  <option value="">Todas as prioridades</option>
+  @for (p of priorities; track p) {
+    <option [value]="p">{{ p }}</option>
+  }
+</select>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; align-items: start">
+  @for (col of columns; track col.status) {
+    <div
+      cdkDropList
+      [id]="col.status"
+      [cdkDropListData]="col.status"
+      [cdkDropListConnectedTo]="connectedTo(col.status)"
+      (cdkDropListDropped)="onDrop($event)"
+      style="border: 1px solid white; padding: .5rem"
+    >
+      <div style="display: flex; justify-content: space-between">
+        <div style="text-align: center">{{ col.label }}</div>
+        <div>Total: {{ tasksByStatus()[col.status]?.length ?? 0 }}</div>
+      </div>
+      @for (task of tasksByStatus()[col.status] ?? []; track task.id) {
+        <div
+          cdkDrag
+          [cdkDragData]="task"
+          style="border: 1px solid white; padding: .5rem; margin-top: .5rem; cursor: grab"
+        >
+          <div>
+            <div>
+              Título:
+              <input
+                [formControl]="titleCtrlByTaskId()[task.id]"
+                (blur)="onTitleBlur(task.id, task)"
+              />
+            </div>
+            <div style="font-size: 0.875rem">
+              {{ titleCtrlByTaskId()[task.id].value.length }} caracteres
+              @if (titleCtrlByTaskId()[task.id].hasError('minlength')) {
+                <span style="color: red">
+                      (mínimo
+                  {{ titleCtrlByTaskId()[task.id].getError('minlength')?.requiredLength }})
+                    </span>
+              }
+            </div>
+          </div>
+          <div>
+            <div>
+              Descrição:
+              <input
+                [formControl]="descriptionCtrlByTaskId()[task.id]"
+                [maxlength]="maxDescriptionChar"
+                (blur)="onDescriptionBlur(task.id, task)"
+              />
+            </div>
+            <span style="font-size: 0.875rem">
+              {{ descriptionCtrlByTaskId()[task.id].value.length }}/{{ maxDescriptionChar }}
+            </span>
+          </div>
+          <div>
+            Prioridade:
+            <select [formControl]="priorityCtrlByTaskId()[task.id]">
+              @for (p of priorities; track p) {
+                <option [value]="p">{{ p }}</option>
+              }
+            </select>
+          </div>
+          <div>Criado em: {{ task.createdAt }}</div>
+          <button (click)="onViewTask(task.id)">Ver Detalhes</button>
+          <button (click)="onDeleteTask(task.id)">Deletar</button>
+        </div>
+      }
+      <button (click)="board.createTask(col.status)" style="margin-top: .5rem; float: right">
+        Criar tarefa
+      </button>
+    </div>
+  }
+</div>
