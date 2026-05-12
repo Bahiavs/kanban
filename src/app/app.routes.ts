@@ -5,5 +5,9 @@ import { TaskDetailComponent } from './pages/task-detail/task-detail';
 export const routes: Routes = [
   { path: '', redirectTo: 'board', pathMatch: 'full' },
   { path: 'board', component: BoardComponent },
-  { path: 'task/:id', component: TaskDetailComponent },
+  {
+    path: 'task/:id',
+    component: BoardComponent,
+    children: [{ path: '', component: TaskDetailComponent }],
+  },
 ];

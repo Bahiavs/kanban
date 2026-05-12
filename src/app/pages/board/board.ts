@@ -8,12 +8,12 @@ import { Status } from '../../models/status';
 import { Task } from '../../models/task';
 import { Subscription } from 'rxjs';
 import { JsonPipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { BoardRepository } from '../../repositories/board.repository';
 
 @Component({
   selector: 'app-board',
-  imports: [ReactiveFormsModule, JsonPipe, CdkDropList, CdkDrag],
+  imports: [ReactiveFormsModule, JsonPipe, CdkDropList, CdkDrag, RouterOutlet],
   templateUrl: `./board.html`,
   styleUrl: './board.scss',
   providers: [BoardRepository],
