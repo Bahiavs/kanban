@@ -13,18 +13,19 @@
   style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; align-items: start; flex-grow: 1; overflow-y: auto">
   @for (col of columns; track col.status) {
     <div
-      cdkDropList
-      [id]="col.status"
-      [cdkDropListData]="col.status"
-      [cdkDropListConnectedTo]="connectedTo(col.status)"
-      (cdkDropListDropped)="onDrop($event)"
-      style="border: 1px solid white; padding: .5rem; height: 100%; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column"
-    >
+      style="border: 1px solid white; padding: .5rem; height: 100%; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column">
       <div style="display: flex; justify-content: space-between">
         <div style="text-align: center">{{ col.label }}</div>
         <div>Total: {{ tasksByStatus()[col.status]?.length ?? 0 }}</div>
       </div>
-      <div style="flex-grow: 1; overflow-y: auto">
+      <div
+        cdkDropList
+        [id]="col.status"
+        [cdkDropListData]="col.status"
+        [cdkDropListConnectedTo]="connectedTo(col.status)"
+        (cdkDropListDropped)="onDrop($event)"
+        style="flex-grow: 1; overflow-y: auto"
+      >
         @for (task of tasksByStatus()[col.status] ?? []; track task.id) {
           <div
             cdkDrag
