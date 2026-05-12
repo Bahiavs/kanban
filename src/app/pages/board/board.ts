@@ -69,9 +69,9 @@ import { BoardRepository } from '../../repositories/board.repository';
   providers: [BoardRepository],
 })
 export class BoardComponent implements OnDestroy {
-  protected readonly priorities = Object.values(Priority);
-  protected readonly board = new Board();
   private readonly boardRepository = inject(BoardRepository);
+  protected readonly board = this.boardRepository.get() ?? new Board([]);
+  protected readonly priorities = Object.values(Priority);
 
   protected readonly columns = [
     { status: Status.Todo, label: 'A Fazer' },
