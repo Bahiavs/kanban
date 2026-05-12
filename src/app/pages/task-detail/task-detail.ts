@@ -24,13 +24,7 @@ import { Task } from '../../models/task';
   `,
 })
 export class TaskDetailComponent {
-  protected readonly task: Task | undefined;
-
-  constructor() {
-    const route = inject(ActivatedRoute);
-    const repo = inject(BoardRepository);
-    const id = route.snapshot.paramMap.get('id');
-    const board = repo.get();
-    this.task = board?.tasks().find((t) => t.id === id);
-  }
+  private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id');
+  private readonly board = inject(BoardRepository).get();
+  protected readonly task: Task | undefined = this.board?.tasks().find((t) => t.id === this.id);
 }
