@@ -156,12 +156,6 @@ export class BoardComponent implements OnDestroy {
     return titleCtrlByTaskId;
   });
 
-  onTitleBlur(taskId: string, task: Task) {
-    const ctrl = this.titleCtrlByTaskId()[taskId];
-    if (ctrl.valid) this.board.editTaskTitle(taskId, ctrl.value);
-    else ctrl.reset(task.title);
-  }
-
   protected readonly descriptionCtrlByTaskId = computed(() => {
     const tasks = this.board.tasks();
     const descriptionCtrlByTaskId: Record<string, FormControl<string>> = {};
@@ -174,12 +168,6 @@ export class BoardComponent implements OnDestroy {
     }
     return descriptionCtrlByTaskId;
   });
-
-  onDescriptionBlur(taskId: string, task: Task) {
-    const ctrl = this.descriptionCtrlByTaskId()[taskId];
-    if (ctrl.valid) this.board.editTaskDescription(taskId, ctrl.value);
-    else ctrl.reset(task.description);
-  }
 
   private priorityCtrlSubs = new Subscription();
   protected readonly priorityCtrlByTaskId = computed(() => {
@@ -226,5 +214,17 @@ export class BoardComponent implements OnDestroy {
   onDeleteTask(taskId: string) {
     if (!confirm('Tem certeza que deseja deletar esta tarefa?')) return;
     this.board.deleteTask(taskId);
+  }
+
+  onTitleBlur(taskId: string, task: Task) {
+    const ctrl = this.titleCtrlByTaskId()[taskId];
+    if (ctrl.valid) this.board.editTaskTitle(taskId, ctrl.value);
+    else ctrl.reset(task.title);
+  }
+
+  onDescriptionBlur(taskId: string, task: Task) {
+    const ctrl = this.descriptionCtrlByTaskId()[taskId];
+    if (ctrl.valid) this.board.editTaskDescription(taskId, ctrl.value);
+    else ctrl.reset(task.description);
   }
 }
