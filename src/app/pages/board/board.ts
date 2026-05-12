@@ -85,7 +85,7 @@ import { BoardRepository } from '../../repositories/board.repository';
                 </select>
               </div>
               <div>Criado em: {{ task.createdAt }}</div>
-              <button (click)="board.deleteTask(task.id)">Deletar</button>
+              <button (click)="onDeleteTask(task.id)">Deletar</button>
             </div>
           }
           <button (click)="board.createTask(col.status)" style="margin-top: .5rem; float: right">
@@ -216,5 +216,10 @@ export class BoardComponent implements OnDestroy {
     if (event.previousContainer !== event.container) {
       this.board.changeTaskStatus(event.item.data.id, event.container.data);
     }
+  }
+
+  onDeleteTask(taskId: string) {
+    if (!confirm('Tem certeza que deseja deletar esta tarefa?')) return;
+    this.board.deleteTask(taskId);
   }
 }
