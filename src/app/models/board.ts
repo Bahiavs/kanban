@@ -62,6 +62,20 @@ export class Board {
     });
   }
 
+  reorderTask(id: string, targetStatus: Status, beforeTaskId: string | null) {
+    this._tasks.update((tasks) => {
+      const task = tasks.find((t) => t.id === id);
+      if (!task) return tasks;
+      task.status = targetStatus;
+      const remaining = tasks.filter((t) => t.id !== id);
+      if (beforeTaskId === null) return [...remaining, task];
+      const insertAt = remaining.findIndex((t) => t.id === beforeTaskId);
+      return insertAt === -1
+        ? [...remaining, task]
+        : [...remaining.slice(0, insertAt), task, ...remaining.slice(insertAt)];
+    });
+  }
+
   toData() {
     return this._tasks().map((task) => task.toData());
   }

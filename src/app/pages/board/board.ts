@@ -105,7 +105,6 @@ export class BoardComponent implements OnDestroy {
   protected readonly priorities = Object.values(Priority);
 
   protected readonly maxDescriptionChar = Task.maxDescriptionChar;
-  protected readonly minTitleChar = Task.minTitleChar;
   protected readonly columns = [
     { status: Status.Todo, label: 'A Fazer' },
     { status: Status.Doing, label: 'Em Progresso' },
@@ -213,9 +212,15 @@ export class BoardComponent implements OnDestroy {
   }
 
   onDrop(event: CdkDragDrop<Status, Status, Task>) {
-    if (event.previousContainer !== event.container) {
-      this.board.changeTaskStatus(event.item.data.id, event.container.data);
-    }
+    const task = event.item.data;
+    const targetStatus = event.container.data;
+    const sameColumn = event.previousContainer === event.container;
+    const tasksInTarget = this.tasksByStatus()[targetStatus] ?? [];
+    const tasksForIndexing = sameColumn
+      ? tasksInTarget.filter((t) => t.id !== task.id)
+      : tasksInTarget;
+    const beforeTask = tasksForIndexing[event.currentIndex] ?? null;
+    this.board.reorderTask(task.id, targetStatus, beforeTask?.id ?? null);
   }
 
   onDeleteTask(taskId: string) {
