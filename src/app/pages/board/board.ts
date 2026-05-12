@@ -1,4 +1,4 @@
-import { Component, computed, OnDestroy } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { CdkDragDrop, CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
@@ -8,6 +8,7 @@ import { Status } from '../../models/status';
 import { Task } from '../../models/task';
 import { Subscription } from 'rxjs';
 import { JsonPipe } from '@angular/common';
+import { BoardRepository } from '../../repositories/board.repository';
 
 @Component({
   selector: 'app-board',
@@ -65,10 +66,12 @@ import { JsonPipe } from '@angular/common';
 
     <pre>{{ board.tasks() | json }}</pre>
   `,
+  providers: [BoardRepository],
 })
 export class BoardComponent implements OnDestroy {
   protected readonly priorities = Object.values(Priority);
   protected readonly board = new Board();
+  private readonly boardRepository = inject(BoardRepository);
 
   protected readonly columns = [
     { status: Status.Todo, label: 'A Fazer' },
@@ -155,6 +158,11 @@ export class BoardComponent implements OnDestroy {
       this.priorityCtrlSubs.add(sub);
     }
     return priorityCtrlByTaskId;
+  });
+
+  private readonly boardPersister = effect(() => {
+    const tasks = this.board.tasks();
+    this.boardRepository.save(this.board);
   });
 
   ngOnDestroy() {

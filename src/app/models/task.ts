@@ -11,4 +11,15 @@ export class Task {
     public priority: Priority,
     public status: Status,
   ) {}
+
+  toString() {
+    return JSON.stringify({
+      id: this.id,
+      createdAt: this.createdAt,
+      title: this.title,
+      description: this.description,
+      priority: this.priority,
+      status: this.status,
+    })
+  }
 }
