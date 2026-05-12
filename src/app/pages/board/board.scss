@@ -3,3 +3,56 @@
   flex-direction: column;
   height: 100dvh;
 }
+
+.filters {
+  display: flex;
+}
+
+.board-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.column {
+  border: 1px solid white;
+  padding: .5rem;
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.column-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.column-label {
+  text-align: center;
+}
+
+.drop-list {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.task-card {
+  border: 1px solid white;
+  padding: .5rem;
+  margin-top: .5rem;
+  cursor: grab;
+}
+
+.char-count {
+  font-size: 0.875rem;
+}
+
+.create-task-btn {
+  margin-top: .5rem;
+  float: right;
+}

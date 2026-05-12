@@ -1,4 +1,4 @@
-<div style="display: flex">
+<div class="filters">
   <input type="text" [formControl]="filterCtrl" placeholder="Filtrar por título ou descrição" />
 
   <select [formControl]="filterPriorityCtrl">
@@ -9,13 +9,11 @@
   </select>
 </div>
 
-<div
-  style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; align-items: start; flex-grow: 1; overflow-y: auto">
+<div class="board-grid">
   @for (col of columns; track col.status) {
-    <div
-      style="border: 1px solid white; padding: .5rem; height: 100%; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column">
-      <div style="display: flex; justify-content: space-between">
-        <div style="text-align: center">{{ col.label }}</div>
+    <div class="column">
+      <div class="column-header">
+        <div class="column-label">{{ col.label }}</div>
         <div>Total: {{ tasksByStatus()[col.status]?.length ?? 0 }}</div>
       </div>
       <div
@@ -24,13 +22,13 @@
         [cdkDropListData]="col.status"
         [cdkDropListConnectedTo]="connectedTo(col.status)"
         (cdkDropListDropped)="onDrop($event)"
-        style="flex-grow: 1; overflow-y: auto"
+        class="drop-list"
       >
         @for (task of tasksByStatus()[col.status] ?? []; track task.id) {
           <div
             cdkDrag
             [cdkDragData]="task"
-            style="border: 1px solid white; padding: .5rem; margin-top: .5rem; cursor: grab"
+            class="task-card"
           >
             <div>
               <div>
@@ -40,7 +38,7 @@
                   (blur)="onTitleBlur(task.id, task)"
                 />
               </div>
-              <div style="font-size: 0.875rem">
+              <div class="char-count">
                 {{ titleCtrlByTaskId()[task.id].value.length }} caracteres
                 @if (titleCtrlByTaskId()[task.id].hasError('minlength')) {
                   <span style="color: red">
@@ -59,7 +57,7 @@
                   (blur)="onDescriptionBlur(task.id, task)"
                 />
               </div>
-              <span style="font-size: 0.875rem">
+              <span class="char-count">
               {{ descriptionCtrlByTaskId()[task.id].value.length }}/{{ maxDescriptionChar }}
             </span>
             </div>
@@ -77,7 +75,7 @@
           </div>
         }
       </div>
-      <button (click)="board.createTask(col.status)" style="margin-top: .5rem; float: right">
+      <button (click)="board.createTask(col.status)" class="create-task-btn">
         Criar tarefa
       </button>
     </div>
