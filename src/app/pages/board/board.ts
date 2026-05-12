@@ -15,6 +15,7 @@ import { BoardRepository } from '../../repositories/board.repository';
   selector: 'app-board',
   imports: [ReactiveFormsModule, JsonPipe, CdkDropList, CdkDrag],
   templateUrl: `./board.html`,
+  styleUrl: './board.scss',
   providers: [BoardRepository],
 })
 export class BoardComponent implements OnDestroy {
