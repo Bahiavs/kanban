@@ -44,10 +44,18 @@ import { BoardRepository } from '../../repositories/board.repository';
               [cdkDragData]="task"
             >
               <div>
-                Título: <input [formControl]="titleCtrlByTaskId()[task.id]" />
+                Título:
+                <input
+                  [formControl]="titleCtrlByTaskId()[task.id]"
+                  (blur)="onTitleBlur(task.id, task)"
+                />
                 @if (titleCtrlByTaskId()[task.id].hasError('minlength')) {
                   <span style="color: red; font-size: 0.875rem">
-                    Mínimo de {{ titleCtrlByTaskId()[task.id].getError('minlength')?.requiredLength }} caracteres
+                    Mínimo de
+                    {{
+                      titleCtrlByTaskId()[task.id].getError('minlength')?.requiredLength
+                    }}
+                    caracteres
                   </span>
                 }
               </div>
@@ -118,11 +126,8 @@ export class BoardComponent implements OnDestroy {
     return grouped;
   });
 
-  private titleCtrlSubs = new Subscription();
   protected readonly titleCtrlByTaskId = computed(() => {
     const tasks = this.board.tasks();
-    this.titleCtrlSubs.unsubscribe();
-    this.titleCtrlSubs = new Subscription();
     const titleCtrlByTaskId: Record<string, FormControl<string>> = {};
     for (const task of tasks) {
       const ctrl = new FormControl(task.title, {
@@ -130,11 +135,15 @@ export class BoardComponent implements OnDestroy {
         validators: Validators.minLength(Task.minTitleChar),
       });
       titleCtrlByTaskId[task.id] = ctrl;
-      const sub = ctrl.valueChanges.subscribe((value) => this.board.editTaskTitle(task.id, value));
-      this.titleCtrlSubs.add(sub);
     }
     return titleCtrlByTaskId;
   });
+
+  onTitleBlur(taskId: string, task: Task) {
+    const ctrl = this.titleCtrlByTaskId()[taskId];
+    if (ctrl.valid) this.board.editTaskTitle(taskId, ctrl.value);
+    else ctrl.reset(task.title);
+  }
 
   private descriptionCtrlSubs = new Subscription();
   protected readonly descriptionCtrlByTaskId = computed(() => {
@@ -176,7 +185,6 @@ export class BoardComponent implements OnDestroy {
   });
 
   ngOnDestroy() {
-    this.titleCtrlSubs.unsubscribe();
     this.descriptionCtrlSubs.unsubscribe();
     this.priorityCtrlSubs.unsubscribe();
   }
