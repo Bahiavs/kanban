@@ -8,6 +8,7 @@ import { Status } from '../../models/status';
 import { Task } from '../../models/task';
 import { Subscription } from 'rxjs';
 import { JsonPipe } from '@angular/common';
+import { Router } from '@angular/router';
 import { BoardRepository } from '../../repositories/board.repository';
 
 @Component({
@@ -85,6 +86,7 @@ import { BoardRepository } from '../../repositories/board.repository';
                 </select>
               </div>
               <div>Criado em: {{ task.createdAt }}</div>
+              <button (click)="onViewTask(task.id)">Ver Detalhes</button>
               <button (click)="onDeleteTask(task.id)">Deletar</button>
             </div>
           }
@@ -101,6 +103,7 @@ import { BoardRepository } from '../../repositories/board.repository';
 })
 export class BoardComponent implements OnDestroy {
   private readonly boardRepository = inject(BoardRepository);
+  private readonly router = inject(Router);
   protected readonly board = this.boardRepository.get() ?? new Board([]);
   protected readonly priorities = Object.values(Priority);
 
@@ -209,6 +212,10 @@ export class BoardComponent implements OnDestroy {
       : tasksInTarget;
     const beforeTask = tasksForIndexing[event.currentIndex] ?? null;
     this.board.reorderTask(task.id, targetStatus, beforeTask?.id ?? null);
+  }
+
+  onViewTask(taskId: string) {
+    this.router.navigate(['/task', taskId]);
   }
 
   onDeleteTask(taskId: string) {
