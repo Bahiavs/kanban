@@ -38,24 +38,20 @@
                   (blur)="onTitleBlur(task.id, task)"
                 />
               </div>
-              <div class="char-count">
-                {{ titleCtrlByTaskId()[task.id].value.length }} caracteres
-                @if (titleCtrlByTaskId()[task.id].hasError('minlength')) {
-                  <span style="color: red">
-                      (mínimo
-                    {{ titleCtrlByTaskId()[task.id].getError('minlength')?.requiredLength }})
-                    </span>
-                }
-              </div>
+              @if (titleCtrlByTaskId()[task.id].hasError('minlength')) {
+                <span style="color: red">
+                  (mínimo {{ titleCtrlByTaskId()[task.id].getError('minlength')?.requiredLength }})
+                </span>
+              }
             </div>
             <div>
               <div>
                 Descrição:
-                <input
+                <textarea
                   [formControl]="descriptionCtrlByTaskId()[task.id]"
                   [maxlength]="maxDescriptionChar"
                   (blur)="onDescriptionBlur(task.id, task)"
-                />
+                ></textarea>
               </div>
               <span class="char-count">
               {{ descriptionCtrlByTaskId()[task.id].value.length }}/{{ maxDescriptionChar }}
