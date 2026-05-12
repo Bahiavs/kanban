@@ -30,25 +30,22 @@
             [cdkDragData]="task"
             class="task-card"
           >
-            <div>
-              <div style="display: flex; gap: 1em">
-                <div>Título:</div>
-                <input
-                  [formControl]="titleCtrlByTaskId()[task.id]"
-                  (blur)="onTitleBlur(task.id, task)"
-                  style="flex-grow: 1"
-                />
-                @if (titleCtrlByTaskId()[task.id].hasError('minlength')) {
-                  <span style="color: red">
-                    (mínimo {{ titleCtrlByTaskId()[task.id].getError('minlength')?.requiredLength }})
-                  </span>
-                }
-              </div>
+            <div class="task-title-row">
+              <div>Título:</div>
+              <input
+                [formControl]="titleCtrlByTaskId()[task.id]"
+                (blur)="onTitleBlur(task.id, task)"
+              />
+              @if (titleCtrlByTaskId()[task.id].hasError('minlength')) {
+                <span class="title-error">
+                  (mínimo {{ titleCtrlByTaskId()[task.id].getError('minlength')?.requiredLength }})
+                </span>
+              }
             </div>
-            <div style="display: flex; gap: 1em; margin-top: 1rem;">
+            <div class="task-description-row">
               <div>
                 <div>Descrição:</div>
-                <div style="text-align: right; font-size: .8rem">
+                <div class="description-counter">
                   {{ descriptionCtrlByTaskId()[task.id].value.length }}/{{ maxDescriptionChar }}
                 </div>
               </div>
@@ -56,20 +53,19 @@
                 [formControl]="descriptionCtrlByTaskId()[task.id]"
                 [maxlength]="maxDescriptionChar"
                 (blur)="onDescriptionBlur(task.id, task)"
-                style="flex-grow: 1; height: 5em; background: transparent;border-radius: 8px; padding: .5em"
               ></textarea>
             </div>
-            <div style="display: flex; gap: 1em; margin-top: 1rem;">
+            <div class="task-footer-row">
               <div>Prioridade:</div>
-              <div style="display: inline-grid">
-                <select [formControl]="priorityCtrlByTaskId()[task.id]" style="grid-area: 1/1">
+              <div class="priority-select-wrapper">
+                <select [formControl]="priorityCtrlByTaskId()[task.id]">
                   @for (p of priorities; track p) {
                     <option [value]="p">{{ p }}</option>
                   }
                 </select>
-                <span style="grid-area: 1/1; visibility: hidden; pointer-events: none; padding: 0 1.5em 0 0.5em; white-space: pre">{{ priorityCtrlByTaskId()[task.id].value }}</span>
+                <span class="priority-size-mirror">{{ priorityCtrlByTaskId()[task.id].value }}</span>
               </div>
-              <button (click)="onViewTask(task.id)" style="margin-left: auto">
+              <button (click)="onViewTask(task.id)" class="view-details-btn">
                 Ver Detalhes
               </button>
               <button (click)="onDeleteTask(task.id)">Deletar</button>

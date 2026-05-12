@@ -38,7 +38,7 @@ export class TaskDetailComponent implements OnInit {
       <h2>{{ task.title }}</h2>
       <div class="row">
         <span class="label">Descrição</span>
-        <span style="overflow-wrap: break-word; min-width: 0">{{ task.description || '—' }}</span>
+        <span class="description-value">{{ task.description || '—' }}</span>
       </div>
       <div class="row">
         <span class="label">Prioridade</span>
@@ -79,6 +79,11 @@ export class TaskDetailComponent implements OnInit {
     .label {
       color: rgb(255 255 255 / 0.6);
       white-space: nowrap;
+    }
+
+    .description-value {
+      overflow-wrap: break-word;
+      min-width: 0;
     }
   `]
 })
