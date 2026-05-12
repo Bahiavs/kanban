@@ -45,7 +45,7 @@
                 }
               </div>
             </div>
-            <div style="display: flex; gap: 1em; margin-top: .5rem;">
+            <div style="display: flex; gap: 1em; margin-top: 1rem;">
               <div>
                 <div>Descrição:</div>
                 <div style="text-align: right; font-size: .8rem">
@@ -56,7 +56,7 @@
                 [formControl]="descriptionCtrlByTaskId()[task.id]"
                 [maxlength]="maxDescriptionChar"
                 (blur)="onDescriptionBlur(task.id, task)"
-                style="flex-grow: 1; height: 5em"
+                style="flex-grow: 1; height: 5em; background: transparent;border-radius: 8px; padding: .5em"
               ></textarea>
             </div>
             <div style="display: flex; gap: 1em; margin-top: .5rem;">
